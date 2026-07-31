@@ -1,3 +1,7 @@
+# Rafael Santiago Moreno Velasquez
+
+# Sebastian Castillejo Angulo
+
 
 ### Escuela Colombiana de Ingeniería
 ### Arquitecturas de Software - ARSW
@@ -18,9 +22,25 @@
 1. De acuerdo con lo revisado en las lecturas, complete las clases CountThread, para que las mismas definan el ciclo de vida de un hilo que imprima por pantalla los números entre A y B.
 2. Complete el método __main__ de la clase CountMainThreads para que:
 	1. Cree 3 hilos de tipo CountThread, asignándole al primero el intervalo [0..99], al segundo [99..199], y al tercero [200..299].
+
+	![alt text](image-2.png)
+
 	2. Inicie los tres hilos con 'start()'.
+	
+	![alt text](image-1.png)
+
 	3. Ejecute y revise la salida por pantalla. 
+
+	![alt text](image.png)
+	
+	### los cambios fueron realizados en la clase de Threads.java y CountThreadsMain.java 
+
 	4. Cambie el incio con 'start()' por 'run()'. Cómo cambia la salida?, por qué?.
+
+	![alt text](image-4.png)
+	![alt text](image-3.png)
+
+	en este caso con el run() la salida fue secuencial, el star() lo que hace es crear un hilo y corre el run(), pero si solo corremos el run() es hacer un solo llamado al metodo normal
 
 **Parte II - Ejercicio Black List Search**
 
