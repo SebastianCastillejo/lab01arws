@@ -86,14 +86,69 @@ La estrategia de paralelismo antes implementada es ineficiente en ciertos casos,
 A partir de lo anterior, implemente la siguiente secuencia de experimentos para realizar las validación de direcciones IP dispersas (por ejemplo 202.24.34.55), tomando los tiempos de ejecución de los mismos (asegúrese de hacerlos en la misma máquina):
 
 1. Un solo hilo.
+
+![alt text](image-17.png)
+![alt text](image-16.png)
+
 2. Tantos hilos como núcleos de procesamiento (haga que el programa determine esto haciendo uso del [API Runtime](https://docs.oracle.com/javase/7/docs/api/java/lang/Runtime.html)).
+
+![alt text](image-15.png)
+![alt text](image-11.png)
+![alt text](image-18.png)
+
 3. Tantos hilos como el doble de núcleos de procesamiento.
+
+![alt text](image-10.png)
+![alt text](image-12.png)
+![alt text](image-19.png)
+
 4. 50 hilos.
+
+![alt text](image-13.png)
+![alt text](image-20.png)
+
 5. 100 hilos.
+
+![alt text](image-7.png)
+![alt text](image-21.png)
+
+
 
 Al iniciar el programa ejecute el monitor jVisualVM, y a medida que corran las pruebas, revise y anote el consumo de CPU y de memoria en cada caso. ![](img/jvisualvm.png)
 
 Con lo anterior, y con los tiempos de ejecución dados, haga una gráfica de tiempo de solución vs. número de hilos. Analice y plantee hipótesis con su compañero para las siguientes preguntas (puede tener en cuenta lo reportado por jVisualVM):
+
+### Resumen de tiempos
+
+Todas las mediciones se hicieron en el mismo equipo (12 núcleos de procesamiento disponibles),
+buscando la dirección dispersa 202.24.34.55, ejecutando cada experimento por separado.
+El tiempo corresponde a una sola búsqueda, medido con `System.currentTimeMillis()` alrededor
+de la llamada a `checkHost`.
+
+| Experimento | Hilos | Tiempo (ms) | Aceleración | Eficiencia (aceleración / hilos) |
+|---|---|---|---|---|
+| 1. Un solo hilo | 1 | 126.492 | 1,0x | 100 % |
+| 2. Tantos hilos como núcleos | 12 | 10.701 | 11,8x | 98,5 % |
+| 3. El doble de núcleos | 24 | 5.361 | 23,6x | 98,3 % |
+| 4. 50 hilos | 50 | 2.609 | 48,5x | 97,0 % |
+| 5. 100 hilos | 100 | 1.421 | 89,0x | 89,0 % |
+
+el experimento con 100 hilos se ejecutó dentro de un ciclo de 5 repeticiones, porque una
+sola búsqueda dura ~1,4 segundos y jVisualVM no alcanza a tomar muestras. El tiempo reportado
+sigue siendo el de una búsqueda; lo que cambia es la duración total del proceso.
+
+![alt text](image-22.png)
+
+Notamos que cuando se duplica el número de hilos, el tiempo se reduce
+aproximadamente a la mitad.
+
+![alt text](image-23.png)
+
+La aceleración es el tiempo con un hilo dividido entre el tiempo con N hilos (el
+S(n) de Amdahl). La línea punteada es el ideal teórico: aceleración = número de hilos.
+Con esta gráfica lo que se busca es mirar qué tan bien se aprovechan los hilos
+agregados. Vemos que sigue la línea ideal hasta 50 hilos, pero en 100 empieza a
+bajar el rendimiento.
 
 **Parte IV - Ejercicio Black List Search**
 

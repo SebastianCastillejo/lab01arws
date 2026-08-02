@@ -18,53 +18,65 @@ import java.util.logging.Logger;
 public class HostBlackListsValidator {
 
     private static final int BLACK_LIST_ALARM_COUNT=5;
-    
+
     /**
      * Check the given host's IP address in all the available black lists,
      * and report it as NOT Trustworthy when such IP was reported in at least
      * BLACK_LIST_ALARM_COUNT lists, or as Trustworthy in any other case.
-     * The search is not exhaustive: When the number of occurrences is equal to
-     * BLACK_LIST_ALARM_COUNT, the search is finished, the host reported as
-     * NOT Trustworthy, and the list of the five blacklists returned.
+     * The search space is split among n threads, and the search is exhaustive:
+     * every black list is checked, the occurrences found by each thread are
+     * added up, and only then the host is reported.
      * @param ipaddress suspicious host's IP address.
+     * @param n number of threads the search is distributed among.
      * @return  Blacklists numbers where the given host's IP address was found.
      */
-    public List<Integer> checkHost(String ipaddress){
+    public List<Integer> checkHost(String ipaddress,int n){
         
         LinkedList<Integer> blackListOcurrences=new LinkedList<>();
+        int ocurrencias  =  0;
+        int listasRevisadas = 0;
+        HostBlacklistsDataSourceFacade skds = HostBlacklistsDataSourceFacade.getInstance();
         
-        int ocurrencesCount=0;
         
-        HostBlacklistsDataSourceFacade skds=HostBlacklistsDataSourceFacade.getInstance();
-        
-        int checkedListsCount=0;
-        
-        for (int i=0;i<skds.getRegisteredServersCount() && ocurrencesCount<BLACK_LIST_ALARM_COUNT;i++){
-            checkedListsCount++;
-            
-            if (skds.isInBlackListServer(i, ipaddress)){
-                
-                blackListOcurrences.add(i);
-                
-                ocurrencesCount++;
+        LinkedList<HostSearchThread> hilos = new LinkedList<>();
+
+        int totalListas = skds.getRegisteredServersCount();
+        int tamSegmento = totalListas / n;
+
+        for (int i=0;i<n;i++){
+            int inicio = i * tamSegmento;
+            int fin = (i == n-1) ? totalListas : inicio + tamSegmento;
+
+            HostSearchThread host = new HostSearchThread(ipaddress, inicio, fin);
+            hilos.add(host);
+            host.start();
+        }
+
+        for (HostSearchThread host : hilos){
+            try {
+                host.join();
+            } catch (InterruptedException ex) {
+                LOG.log(Level.SEVERE, "Busqueda interrumpida", ex);
+                Thread.currentThread().interrupt();
             }
+            blackListOcurrences.addAll(host.getBlackListOcurrences());
+            ocurrencias  +=  host.getOcurrencesCount();
+            listasRevisadas  +=  host.getCheckedListsCount();
         }
         
-        if (ocurrencesCount>=BLACK_LIST_ALARM_COUNT){
+        if (ocurrencias >= BLACK_LIST_ALARM_COUNT){
             skds.reportAsNotTrustworthy(ipaddress);
         }
         else{
             skds.reportAsTrustworthy(ipaddress);
         }                
         
-        LOG.log(Level.INFO, "Checked Black Lists:{0} of {1}", new Object[]{checkedListsCount, skds.getRegisteredServersCount()});
+        LOG.log(Level.INFO, "Checked Black Lists:{0} of {1}", new Object[]{listasRevisadas , skds.getRegisteredServersCount()});
         
         return blackListOcurrences;
     }
     
     
     private static final Logger LOG = Logger.getLogger(HostBlackListsValidator.class.getName());
-    
-    
-    
+
 }
