@@ -42,9 +42,6 @@ public class HostSearchThread extends Thread {
         return blackListOcurrences;
     }
 
-    /**
-     * @return numero de listas negras que este hilo alcanzo a revisar.
-     */
     public int getCheckedListsCount() {
         return checkedListsCount;
     }
