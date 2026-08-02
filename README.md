@@ -23,22 +23,22 @@
 2. Complete el método __main__ de la clase CountMainThreads para que:
 	1. Cree 3 hilos de tipo CountThread, asignándole al primero el intervalo [0..99], al segundo [99..199], y al tercero [200..299].
 
-	![alt text](image-2.png)
+	![alt text](img/image-2.png)
 
 	2. Inicie los tres hilos con 'start()'.
 	
-	![alt text](image-5.png)
+	![alt text](img/image-5.png)
 
 	3. Ejecute y revise la salida por pantalla. 
 
-	![alt text](image.png)
+	![alt text](img/image.png)
 	
 	### los cambios fueron realizados en la clase de Threads.java y CountThreadsMain.java 
 
 	4. Cambie el incio con 'start()' por 'run()'. Cómo cambia la salida?, por qué?.
 
-	![alt text](image-4.png)
-	![alt text](image-3.png)
+	![alt text](img/image-4.png)
+	![alt text](img/image-3.png)
 
 	en este caso con el run() la salida fue secuencial, el star() lo que hace es crear un hilo y corre el run(), pero si solo corremos el run() es hacer un solo llamado al metodo normal
 
@@ -70,11 +70,15 @@ Para 'refactorizar' este código, y hacer que explote la capacidad multi-núcleo
 
 1. Cree una clase de tipo Thread que represente el ciclo de vida de un hilo que haga la búsqueda de un segmento del conjunto de servidores disponibles. Agregue a dicha clase un método que permita 'preguntarle' a las instancias del mismo (los hilos) cuantas ocurrencias de servidores maliciosos ha encontrado o encontró.
 
+![alt text](img/image-24.png)
+
 2. Agregue al método 'checkHost' un parámetro entero N, correspondiente al número de hilos entre los que se va a realizar la búsqueda (recuerde tener en cuenta si N es par o impar!). Modifique el código de este método para que divida el espacio de búsqueda entre las N partes indicadas, y paralelice la búsqueda a través de N hilos. Haga que dicha función espere hasta que los N hilos terminen de resolver su respectivo sub-problema, agregue las ocurrencias encontradas por cada hilo a la lista que retorna el método, y entonces calcule (sumando el total de ocurrencuas encontradas por cada hilo) si el número de ocurrencias es mayor o igual a _BLACK_LIST_ALARM_COUNT_. Si se da este caso, al final se DEBE reportar el host como confiable o no confiable, y mostrar el listado con los números de las listas negras respectivas. Para lograr este comportamiento de 'espera' revise el método [join](https://docs.oracle.com/javase/tutorial/essential/concurrency/join.html) del API de concurrencia de Java. Tenga también en cuenta:
 
 	* Dentro del método checkHost Se debe mantener el LOG que informa, antes de retornar el resultado, el número de listas negras revisadas VS. el número de listas negras total (línea 60). Se debe garantizar que dicha información sea verídica bajo el nuevo esquema de procesamiento en paralelo planteado.
 
 	* Se sabe que el HOST 202.24.34.55 está reportado en listas negras de una forma más dispersa, y que el host 212.24.24.55 NO está en ninguna lista negra.
+
+	![alt text](img/image-25.png)
 
 
 **Parte II.I Para discutir la próxima clase (NO para implementar aún)**
@@ -87,30 +91,30 @@ A partir de lo anterior, implemente la siguiente secuencia de experimentos para 
 
 1. Un solo hilo.
 
-![alt text](image-17.png)
-![alt text](image-16.png)
+![alt text](img/image-17.png)
+![alt text](img/image-16.png)
 
 2. Tantos hilos como núcleos de procesamiento (haga que el programa determine esto haciendo uso del [API Runtime](https://docs.oracle.com/javase/7/docs/api/java/lang/Runtime.html)).
 
-![alt text](image-15.png)
-![alt text](image-11.png)
-![alt text](image-18.png)
+![alt text](img/image-15.png)
+![alt text](img/image-11.png)
+![alt text](img/image-18.png)
 
 3. Tantos hilos como el doble de núcleos de procesamiento.
 
-![alt text](image-10.png)
-![alt text](image-12.png)
-![alt text](image-19.png)
+![alt text](img/image-10.png)
+![alt text](img/image-12.png)
+![alt text](img/image-19.png)
 
 4. 50 hilos.
 
-![alt text](image-13.png)
-![alt text](image-20.png)
+![alt text](img/image-13.png)
+![alt text](img/image-20.png)
 
 5. 100 hilos.
 
-![alt text](image-7.png)
-![alt text](image-21.png)
+![alt text](img/image-7.png)
+![alt text](img/image-21.png)
 
 
 
@@ -120,7 +124,7 @@ Con lo anterior, y con los tiempos de ejecución dados, haga una gráfica de tie
 
 ### Resumen de tiempos
 
-Todas las mediciones se hicieron en el mismo equipo (12 núcleos de procesamiento disponibles),
+Todas las mediciones se hicieron en el mismo equipo,
 buscando la dirección dispersa 202.24.34.55, ejecutando cada experimento por separado.
 El tiempo corresponde a una sola búsqueda, medido con `System.currentTimeMillis()` alrededor
 de la llamada a `checkHost`.
@@ -134,15 +138,15 @@ de la llamada a `checkHost`.
 | 5. 100 hilos | 100 | 1.421 | 89,0x | 89,0 % |
 
 el experimento con 100 hilos se ejecutó dentro de un ciclo de 5 repeticiones, porque una
-sola búsqueda dura ~1,4 segundos y jVisualVM no alcanza a tomar muestras. El tiempo reportado
+sola búsqueda dura 1,4 segundos y jVisualVM no alcanza a tomar muestras. El tiempo reportado
 sigue siendo el de una búsqueda; lo que cambia es la duración total del proceso.
 
-![alt text](image-22.png)
+![alt text](img/image-22.png)
 
 Notamos que cuando se duplica el número de hilos, el tiempo se reduce
 aproximadamente a la mitad.
 
-![alt text](image-23.png)
+![alt text](img/image-23.png)
 
 La aceleración es el tiempo con un hilo dividido entre el tiempo con N hilos (el
 S(n) de Amdahl). La línea punteada es el ideal teórico: aceleración = número de hilos.
