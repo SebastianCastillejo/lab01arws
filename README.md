@@ -27,7 +27,7 @@
 
 	2. Inicie los tres hilos con 'start()'.
 	
-	![alt text](image-1.png)
+	![alt text](image-5.png)
 
 	3. Ejecute y revise la salida por pantalla. 
 

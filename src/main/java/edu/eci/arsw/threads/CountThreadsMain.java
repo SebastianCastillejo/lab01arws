@@ -12,18 +12,29 @@ package edu.eci.arsw.threads;
 
 
 public class CountThreadsMain {
-    
+
     static int A = 0;
-    static int B = 299;    
+    static int B = 299;
+    static int N = 7;
 
     public static void main(String a[]){
-        Thread hilo1 = new Thread(new CountThread( A, B/3));
-        Thread hilo2 = new Thread(new CountThread(B/3, B/2));
-        Thread hilo3 = new Thread(new CountThread(B/2, B));
 
-        hilo1.start();
-        hilo2.start();
-        hilo3.start();
+        int total = B - A + 1;
+        int tamSegmento = total / N;
+
+        Thread[] hilos = new Thread[N];
+
+        for (int i = 0; i < N; i++){
+            int inicio = A + i * tamSegmento;
+            int fin = (i == N-1) ? B + 1 : inicio + tamSegmento;
+
+            hilos[i] = new Thread(new CountThread(inicio, fin));
+        }
+
+        for (Thread hilo : hilos){
+            hilo.start();
+        }
+
     }
-    
+
 }
