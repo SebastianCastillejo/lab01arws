@@ -25,7 +25,7 @@ public class Main {
         // buscar(IP,100);
         //}
 
-        buscar(IP,100);
+        buscar(IP,500);
         //buscar(IP,cores*2);
     }
 

@@ -85,6 +85,10 @@ Para 'refactorizar' este código, y hacer que explote la capacidad multi-núcleo
 
 La estrategia de paralelismo antes implementada es ineficiente en ciertos casos, pues la búsqueda se sigue realizando aún cuando los N hilos (en su conjunto) ya hayan encontrado el número mínimo de ocurrencias requeridas para reportar al servidor como malicioso. Cómo se podría modificar la implementación para minimizar el número de consultas en estos casos?, qué elemento nuevo traería esto al problema?
 
+se podria usar una variable compartida que cada hilo actualice al encontrar una coincidencia y consulte periodicamente para saber si ya se alcanzo el umbral, deteniendose de inmediato en ese caso en vez de terminar todo su segmento
+
+el elemento nuevo que esto trae es estado compartido mutable entre hilos, lo cual introduce condiciones de carrera y por lo tanto la necesidad de sincronizacion (por ejemplo con AtomicInteger o synchronized) para evitar que los hilos se pisen al leer/escribir esa variable al mismo tiempo
+
 **Parte III - Evaluación de Desempeño**
 
 A partir de lo anterior, implemente la siguiente secuencia de experimentos para realizar las validación de direcciones IP dispersas (por ejemplo 202.24.34.55), tomando los tiempos de ejecución de los mismos (asegúrese de hacerlos en la misma máquina):
@@ -160,9 +164,44 @@ bajar el rendimiento.
 
 	![](img/ahmdahls.png), donde _S(n)_ es el mejoramiento teórico del desempeño, _P_ la fracción paralelizable del algoritmo, y _n_ el número de hilos, a mayor _n_, mayor debería ser dicha mejora. Por qué el mejor desempeño no se logra con los 500 hilos?, cómo se compara este desempeño cuando se usan 200?. 
 
+![alt text](img/image-1.png)
+
+![alt text](img/image-1.png)
+
+### Resumen de tiempos (incluyendo 200 y 500 hilos)
+
+Mediciones tomadas en el mismo equipo (12 núcleos), buscando la dirección dispersa
+202.24.34.55, ejecutando cada experimento por separado.
+
+| Experimento | Hilos | Tiempo (ms) | Aceleración | Eficiencia (aceleración / hilos) |
+|---|---|---|---|---|
+| 1. Un solo hilo | 1 | 126.492 | 1,0x | 100 % |
+| 2. Núcleos | 12 | 10.701 | 11,8x | 98,5 % |
+| 3. Doble de núcleos | 24 | 5.361 | 23,6x | 98,3 % |
+| 4. 50 hilos | 50 | 2.609 | 48,5x | 97,0 % |
+| 5. 100 hilos | 100 | 1.421 | 89,0x | 89,0 % |
+| 6. 200 hilos | 200 | 710 | 178,2x | 89,1 % |
+| 7. 500 hilos | 500 | 908 | 139,3x | 27,9 % |
+
+el mejor desempeno no se logra con 500 hilos porque amdahl asume que agregar hilos no cuesta nada, pero en la practica si cuesta con solo 12 nucleos, cada hilo de mas genera overhead
+
+esto se confirma con las pruebas: con 200 hilos se logro el mejor tiempo (710 ms, 178,2x de aceleracion, 89,1% de eficiencia), pero con 500 hilos el tiempo subio a 908 ms. osea que mas de 200 hilos el overhead de manejar tantos hilos supera el beneficio del paralelismo adicional, y el desempeno real se aleja cada vez mas del ideal teorico.
+
 2. Cómo se comporta la solución usando tantos hilos de procesamiento como núcleos comparado con el resultado de usar el doble de éste?.
 
+en base a la parte iii, se puede decir que en ambos casos (12 y 24 hilos) la solucion es eficiente, ya que la tabla muestra que se aprovecha bien el hardware disponible.
+
+tomando el ejemplo de 12 hilos y 24 hilos, al duplicar el numero de hilos, la diferencia en aceleracion y eficiencia es minima 98,5% y 98,3%. esto indica que los hilos no permanecen ocupados el 100% del tiempo en cpu —probablemente porque hay tiempos de espera durante la consulta a cada lista negra, por lo que el doble de hilos aun encuentra trabajo util que hacer mientras otros estan en espera, sin generar contencion significativa por los nucleos disponibles
+
 3. De acuerdo con lo anterior, si para este problema en lugar de 100 hilos en una sola CPU se pudiera usar 1 hilo en cada una de 100 máquinas hipotéticas, la ley de Amdahls se aplicaría mejor?. Si en lugar de esto se usaran c hilos en 100/c máquinas distribuidas (siendo c es el número de núcleos de dichas máquinas), se mejoraría?. Explique su respuesta.
+
+creeria que si mejoraria, ya que no se estarian compartiendo los mismos recursos fisicos (cpu, cache, memoria), a diferencia de la parte III, donde se tenian muchos hilos compitiendo dentro de un mismo equipo.
+
+pero al usar un hilo por maquina, se debe tener en cuenta un elemento nuevos, como la comunicacion y coordinacion entre esas maquinas, por ejemplo, para reunir y sumar los resultados parciales de cada una al final como el ejemplo de clase de join()
+
+en la tabla de la parte III se observa que, al tener 100 hilos en una sola maquina, el desempeno empieza a desviarse de la linea ideal. al repartir un hilo por maquina, se evitaria esa desviacion causada por la contencion de recursos compartidos, acercandose mas a la linea ideal siempre que el costo de comunicacion entre maquinas no sea muy alto.
+
+para el segundo caso  100/c maquinas, tambien mejoraria respecto a una sola maquina, ya que dentro de cada maquina el numero de hilos coincidiria con su numero de nucleos, parecido a los casos de 12 o 24 hilos de la parte III, donde la eficiencia fue buena, y evitando sobrecarga que si se presento con 100 hilos en 12 nucleos.
 
 
 
