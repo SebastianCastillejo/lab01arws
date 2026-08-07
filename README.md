@@ -130,8 +130,8 @@ Con lo anterior, y con los tiempos de ejecución dados, haga una gráfica de tie
 
 Todas las mediciones se hicieron en el mismo equipo,
 buscando la dirección dispersa 202.24.34.55, ejecutando cada experimento por separado.
-El tiempo corresponde a una sola búsqueda, medido con `System.currentTimeMillis()` alrededor
-de la llamada a `checkHost`.
+El tiempo corresponde a una sola búsqueda, medido con System.currentTimeMillis() alrededor
+de la llamada a checkHost
 
 | Experimento | Hilos | Tiempo (ms) | Aceleración | Eficiencia (aceleración / hilos) |
 |---|---|---|---|---|
@@ -164,14 +164,14 @@ bajar el rendimiento.
 
 	![](img/ahmdahls.png), donde _S(n)_ es el mejoramiento teórico del desempeño, _P_ la fracción paralelizable del algoritmo, y _n_ el número de hilos, a mayor _n_, mayor debería ser dicha mejora. Por qué el mejor desempeño no se logra con los 500 hilos?, cómo se compara este desempeño cuando se usan 200?. 
 
-![alt text](img/image-1.png)
+![alt text](img/image.png)
 
 ![alt text](img/image-1.png)
 
 ### Resumen de tiempos (incluyendo 200 y 500 hilos)
 
 Mediciones tomadas en el mismo equipo (12 núcleos), buscando la dirección dispersa
-202.24.34.55, ejecutando cada experimento por separado.
+202.24.34.55, ejecutando cada experimento por separado
 
 | Experimento | Hilos | Tiempo (ms) | Aceleración | Eficiencia (aceleración / hilos) |
 |---|---|---|---|---|
