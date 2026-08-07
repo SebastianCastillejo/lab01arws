@@ -85,9 +85,9 @@ Para 'refactorizar' este código, y hacer que explote la capacidad multi-núcleo
 
 La estrategia de paralelismo antes implementada es ineficiente en ciertos casos, pues la búsqueda se sigue realizando aún cuando los N hilos (en su conjunto) ya hayan encontrado el número mínimo de ocurrencias requeridas para reportar al servidor como malicioso. Cómo se podría modificar la implementación para minimizar el número de consultas en estos casos?, qué elemento nuevo traería esto al problema?
 
-se podria usar una variable compartida que cada hilo actualice al encontrar una coincidencia y consulte periodicamente para saber si ya se alcanzo el umbral, deteniendose de inmediato en ese caso en vez de terminar todo su segmento
+Para no seguir buscando de más, se puede compartir un contador entre todos los hilos (por ejemplo un AtomicInteger). Cada vez que un hilo encuentra una coincidencia lo actualiza, y antes de revisar la siguiente lista mira si ya se llegó al umbral. Si sí, se sale del ciclo y no termina de recorrer su segmento.
 
-el elemento nuevo que esto trae es estado compartido mutable entre hilos, lo cual introduce condiciones de carrera y por lo tanto la necesidad de sincronizacion (por ejemplo con AtomicInteger o synchronized) para evitar que los hilos se pisen al leer/escribir esa variable al mismo tiempo
+Lo nuevo que aparece con esto es que ahora los hilos comparten un estado que todos pueden leer y escribir al mismo tiempo. Eso abre la puerta a condiciones de carrera, así que toca sincronizar el acceso, ya sea con AtomicInteger o con synchronized, para que no se pisen entre ellos.
 
 **Parte III - Evaluación de Desempeño**
 
